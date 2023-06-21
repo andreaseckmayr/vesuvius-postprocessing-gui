@@ -221,8 +221,8 @@ class ImageProcessorGUI:
 
         self.window.mainloop()
 
-    # F score
     def score_guess(self, guess, truth, beta=0.5):
+        '''F Score'''
         guess = guess.astype(bool)
         truth = truth.astype(bool)
 
@@ -245,8 +245,8 @@ class ImageProcessorGUI:
             / (self.precision * beta ** 2 + self.recall)
 
     def load_image(self):
-        # Load the image and display it on the canvas
-        filename = tk.filedialog.askopenfilename(
+        '''Load the image and display it on the canvas'''
+        filename = filedialog.askopenfilename(
             filetypes=[("PNG Images", "*.png"), ("JPEG Images", "*.jpg")]
         )
         if filename:
@@ -255,8 +255,8 @@ class ImageProcessorGUI:
             self.display_image(self.image)
 
     def load_background_image(self):
-        # Load the image and display it on the canvas
-        filename = tk.filedialog.askopenfilename(
+        '''Load the image and display it on the canvas'''
+        filename = filedialog.askopenfilename(
             filetypes=[("PNG Images", "*.png"), ("JPEG Images", "*.jpg")]
         )
         if filename:
@@ -264,7 +264,7 @@ class ImageProcessorGUI:
             self.display_image(self.image)
 
     def process_image(self):
-        # Apply the erosion and dilation operations with the current settings
+        '''Apply the erosion and dilation operations with the current settings'''
         iterations_de = self.iterations_de_scale.get()
         kernel_size_de_x = self.kernel_de_scale_x.get()
         kernel_size_de_y = self.kernel_de_scale_y.get()
@@ -295,6 +295,7 @@ class ImageProcessorGUI:
         self.display_image(self.processed_image)
 
     def perform_segmentation(self):
+        '''Perform segmentation'''
         # Label contiguous regions
         labeled_image, num_features = ndimage.label(self.processed_image)
 
@@ -319,6 +320,7 @@ class ImageProcessorGUI:
         cv2.imshow('Colored', colored_image)
 
     def remove_small_areas(self):
+        '''Remove small areas'''
         if self.hide_smallest.get():
             # Label contiguous regions
             labeled_image, num_features = ndimage.label(self.processed_image)
@@ -340,12 +342,14 @@ class ImageProcessorGUI:
             self.processed_image = removed_small_regions_image
 
     def perform_median_smoothing(self):
+        '''Perform median smoothing'''
         self.processed_image = cv2.medianBlur(
             self.processed_image,
             ksize=self.kernel_smooth_scale.get()
         )
 
     def perform_dilation_and_erosion(self, iterations_de, kernel_de):
+        '''Perform dilation and erosion'''
         if iterations_de != 0 \
             and kernel_de.shape[0] != 0 \
                 and kernel_de.shape[1] != 0:
@@ -357,6 +361,7 @@ class ImageProcessorGUI:
             )
 
     def perform_erosion_and_dilation(self, iterations_ed, kernel_ed):
+        '''Perform erosion and dilation'''
         if iterations_ed != 0 \
             and kernel_ed.shape[0] != 0 \
                 and kernel_ed.shape[1] != 0:
@@ -368,11 +373,12 @@ class ImageProcessorGUI:
             )
 
     def reset_image(self):
-        # Reset the processed image to the original image
+        '''Reset the processed image to the original image'''
         self.processed_image = self.image.copy()
         self.display_image(self.image)
 
     def display_image(self, image):
+        '''Display the image on the canvas'''
         if self.background_image is None:
             displayed_background_image = self.image
         else:
@@ -427,13 +433,14 @@ class ImageProcessorGUI:
         self.canvas.image = displayed_image
 
     def on_slider_change(self, event):
-        # only process image if slider did not change for delta milliseconds
+        '''only process image if slider did not change for some time'''
         delta = 20
         if hasattr(self, 'job'):
             self.window.after_cancel(self.job)
         self.job = self.window.after(delta, self.process_image)
 
     def get_kernel(self, width, height, diagonal):
+        '''Get the kernel for dilation and erosion'''
         if diagonal == "/":
             res = np.zeros((height, width), dtype=np.uint8)
             x = np.linspace(0, width-1, height)
