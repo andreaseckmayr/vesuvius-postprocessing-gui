@@ -1,5 +1,3 @@
-'''GUI application for vesuvius image processing'''
-
 from typing import Dict
 import random
 import tkinter as tk
@@ -11,7 +9,6 @@ from scipy import ndimage
 
 
 class ImageProcessorGUI:
-    '''Main GUI window for the image processor'''
     def __init__(self):
         self.image = None
         self.background_image = None
@@ -37,16 +34,13 @@ class ImageProcessorGUI:
         self.controls_frame.grid(row=1, column=0, padx=10, pady=10)
 
         # Create a button to load the image
-        self.load_button = ttk.Button(
-            self.controls_frame,
-            text="Load Image",
-            command=self.load_image
-        )
+        self.load_button = ttk.Button(self.controls_frame,
+                                      text="Load Image",
+                                      command=self.load_image)
         self.load_button.grid(row=0, column=0, padx=10, pady=10)
 
         self.load_bg_button = ttk.Button(
-            self.controls_frame,
-            text="Load Background Image",
+            self.controls_frame, text="Load Background Image",
             command=self.load_background_image
         )
         self.load_bg_button.grid(row=0, column=1, padx=10, pady=10)
@@ -58,13 +52,11 @@ class ImageProcessorGUI:
         self.load_bg_button.grid(row=0, column=2, padx=10, pady=10)
 
         self.selected_diagonal = tk.StringVar()
-        self.rb1 = ttk.Radiobutton(self.controls_frame,
-                                   text='Rectangle',
+        self.rb1 = ttk.Radiobutton(self.controls_frame, text='Rectangle',
                                    value='Rectangle',
                                    variable=self.selected_diagonal,
                                    command=self.process_image)
-        self.rb2 = ttk.Radiobutton(self.controls_frame,
-                                   text='/',
+        self.rb2 = ttk.Radiobutton(self.controls_frame, text='/',
                                    value='/',
                                    variable=self.selected_diagonal,
                                    command=self.process_image)
@@ -223,22 +215,14 @@ class ImageProcessorGUI:
         self.controls_frame.grid_columnconfigure(3, weight=1)
 
         # Place the controls frame below the canvas frame
-        self.controls_frame.grid(row=2, column=0, padx=10, pady=10,
+        self.controls_frame.grid(row=2, column=0,
+                                 padx=10, pady=10,
                                  sticky=tk.N)
-
-        # Init
-        self.results = 0
-        self.fn = 0
-        self.fp = 0
-        self.tp = 0
-        self.precision = 0
-        self.recall = 0
-        self.job = None
 
         self.window.mainloop()
 
+    # F score
     def score_guess(self, guess, truth, beta=0.5):
-        '''F Score'''
         guess = guess.astype(bool)
         truth = truth.astype(bool)
 
@@ -261,8 +245,8 @@ class ImageProcessorGUI:
             / (self.precision * beta ** 2 + self.recall)
 
     def load_image(self):
-        '''Load the image and display it on the canvas'''
-        filename = filedialog.askopenfilename(
+        # Load the image and display it on the canvas
+        filename = tk.filedialog.askopenfilename(
             filetypes=[("PNG Images", "*.png"), ("JPEG Images", "*.jpg")]
         )
         if filename:
@@ -271,8 +255,8 @@ class ImageProcessorGUI:
             self.display_image(self.image)
 
     def load_background_image(self):
-        '''Load the image and display it on the canvas'''
-        filename = filedialog.askopenfilename(
+        # Load the image and display it on the canvas
+        filename = tk.filedialog.askopenfilename(
             filetypes=[("PNG Images", "*.png"), ("JPEG Images", "*.jpg")]
         )
         if filename:
@@ -280,24 +264,19 @@ class ImageProcessorGUI:
             self.display_image(self.image)
 
     def process_image(self):
-        '''
-        Apply the erosion and dilation operations
-        with the current settings
-        '''
+        # Apply the erosion and dilation operations with the current settings
         iterations_de = self.iterations_de_scale.get()
         kernel_size_de_x = self.kernel_de_scale_x.get()
         kernel_size_de_y = self.kernel_de_scale_y.get()
 
-        kernel_de = self.get_kernel(kernel_size_de_x,
-                                    kernel_size_de_y,
+        kernel_de = self.get_kernel(kernel_size_de_x, kernel_size_de_y,
                                     self.selected_diagonal.get())
 
         iterations_ed = self.iterations_ed_scale.get()
         kernel_size_ed_x = self.kernel_ed_scale_x.get()
         kernel_size_ed_y = self.kernel_ed_scale_y.get()
 
-        kernel_ed = self.get_kernel(kernel_size_ed_x,
-                                    kernel_size_ed_y,
+        kernel_ed = self.get_kernel(kernel_size_ed_x, kernel_size_ed_y,
                                     self.selected_diagonal.get())
 
         self.processed_image = self.image
@@ -333,11 +312,11 @@ class ImageProcessorGUI:
             print(f'Region {i}: {num_pixels} pixels')
 
         colored_image = cv2.resize(colored_image,
-                                   (self.canvas_width,
-                                    self.canvas_height))
+                                   (self.canvas_width, self.canvas_height))
 
         # Show the original and colored images
-        cv2.imshow('Colored', colored_image)  # ('Original', image)
+        # cv2.imshow('Original', image)
+        cv2.imshow('Colored', colored_image)
 
     def remove_small_areas(self):
         if self.hide_smallest.get():
@@ -361,9 +340,10 @@ class ImageProcessorGUI:
             self.processed_image = removed_small_regions_image
 
     def perform_median_smoothing(self):
-        self.processed_image = \
-            cv2.medianBlur(self.processed_image,
-                           ksize=self.kernel_smooth_scale.get())
+        self.processed_image = cv2.medianBlur(
+            self.processed_image,
+            ksize=self.kernel_smooth_scale.get()
+        )
 
     def perform_dilation_and_erosion(self, iterations_de, kernel_de):
         if iterations_de != 0 \
@@ -423,9 +403,8 @@ class ImageProcessorGUI:
         # ------------- used for generating new background image --------------
 
         displayed_image = image.copy()
-        displayed_image = cv2.resize(displayed_image,
-                                     (self.canvas_width,
-                                      self.canvas_height))
+        displayed_image = cv2.resize(displayed_image, (self.canvas_width,
+                                                       self.canvas_height))
         displayed_background_image = cv2.resize(displayed_background_image,
                                                 (self.canvas_width,
                                                  self.canvas_height))
@@ -441,26 +420,21 @@ class ImageProcessorGUI:
         displayed_image = Image.fromarray(displayed_image)
         displayed_image = ImageTk.PhotoImage(displayed_image)
         self.canvas.delete("all")  # Clear the canvas
-        # Display the image on the canvas
         self.canvas.create_image(
             0, 0, anchor="nw", image=displayed_image
-        )
-        # Keep a reference to the image to
-        # prevent it from being garbage-collected
+        )  # Display the image on the canvas
+        # Keep reference to image to prevent it from being garbage-collected
         self.canvas.image = displayed_image
 
     def on_slider_change(self, event):
         # only process image if slider did not change for delta milliseconds
         delta = 20
-        try:  # if hasattr(self, 'job'):
+        if hasattr(self, 'job'):
             self.window.after_cancel(self.job)
-        except AttributeError:
-            pass
         self.job = self.window.after(delta, self.process_image)
 
     def get_kernel(self, width, height, diagonal):
         if diagonal == "/":
-
             res = np.zeros((height, width), dtype=np.uint8)
             x = np.linspace(0, width-1, height)
             y = np.arange(height-1, -1, -1)
